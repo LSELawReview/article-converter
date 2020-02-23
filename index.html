@@ -17,7 +17,7 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", helvetica, Arial, sans-serif;
-      min-height: 100vh;
+      min-height: 105vh;
       margin-left: 10px;
       margin-right: 10px;
       padding-left: 10px;
@@ -48,7 +48,7 @@
       flex-grow: 1;
       padding: 5px;
     }
-    button {
+    button, select {
       font-size: 20px;
       color: white;
       background-color: green;
@@ -65,6 +65,9 @@
     }
     button.reset:hover {
       background-color: #990000;
+    }
+    select {
+      background-color: purple
     }
 
     .inline {
@@ -93,7 +96,13 @@
     </div>
     <br>
 
-    <div class="buttons" style="height: 5%">
+    <div class="buttons" style="height: 10%">
+      <label for="formatpicker">Format:</label>
+      <select id="formatpicker" class="outline">
+        <option value="simple">Simple: [1]</option>
+        <option value="ftn">Advanced: [^^[1]^^](#_ftn1)</option>
+      </select>
+      <br>
       <!-- <label>Buttons</label> -->
       <button type="button" id="convertcopybutton" class="outline">Convert and Copy Entire Article</button>
       <button type="button" id="convertbutton" class="outline">Convert Only</button>
@@ -105,14 +114,27 @@
 </body>
 
 <script>
+  let bodyRegexSimple = /\[([^\[]+)\]/g
+  let bodyRegexFtn = /\[\^\^\[([^\[]+)\]\^\^\]\(\#\_ftn[^\)]+\)/g
+
+  let footnoteRegexSimple = /\[([^\[]+)\] (.+\n)*/g
+  let footnoteRegexFtn = /\[\[([^\[]+)\]\]\(\#\_ftnref[^\)]+\) (.+\n)*/g
+
+  function format() {
+    let picker = document.getElementById("formatpicker")
+    return picker.value
+  }
+
   function convertArticleBody() {
+    let regex = format() == "simple" ? bodyRegexSimple : bodyRegexFtn
     let bodyTextbox = document.getElementById("bodytextbox")
-    bodyTextbox.value = bodyTextbox.value.replace(/\[([^\[]+)\]/g, "<a class=\"inline-reference\" id=\"inline$1\" href=\"#$1\">$1</a>")
+    bodyTextbox.value = bodyTextbox.value.replace(regex, "<a class=\"inline-reference\" id=\"inline$1\" href=\"#$1\">$1</a>")
   }
 
   function convertFootnotes() {
+    let regex = format() == "simple" ? footnoteRegexSimple : footnoteRegexFtn
     let footnoteTextbox = document.getElementById("footnotestextbox")
-    footnoteTextbox.value = footnoteTextbox.value.replace(/\[([^\[]+)\] (.+\n)*/g, "<a class=\"reference\" id=\"$1\" href=\"#inline$1\">[$1]</a>\n$2")
+    footnoteTextbox.value = footnoteTextbox.value.replace(regex, "<a class=\"reference\" id=\"$1\" href=\"#inline$1\">[$1]</a>\n$2")
   }
 
   function lockArticle() {
