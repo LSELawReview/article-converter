@@ -114,6 +114,8 @@
 </body>
 
 <script>
+  var hasConverted = false
+
   let bodyRegexSimple = /\[([^\[]+)\]/g
   let bodyRegexFtn = /\[\^\^\[([^\[]+)\]\^\^\]\(\#\_ftn[^\)]+\)/g
 
@@ -126,12 +128,16 @@
   }
 
   function convertArticleBody() {
+    if (hasConverted) { return }
+
     let regex = format() == "simple" ? bodyRegexSimple : bodyRegexFtn
     let bodyTextbox = document.getElementById("bodytextbox")
     bodyTextbox.value = bodyTextbox.value.replace(regex, "<a class=\"inline-reference\" id=\"inline$1\" href=\"#$1\">$1</a>")
   }
 
   function convertFootnotes() {
+    if (hasConverted) { return }
+
     let regex = format() == "simple" ? footnoteRegexSimple : footnoteRegexFtn
     let footnoteTextbox = document.getElementById("footnotestextbox")
     footnoteTextbox.value = footnoteTextbox.value.replace(regex, "<a class=\"reference\" id=\"$1\" href=\"#inline$1\">[$1]</a>\n$2")
@@ -171,15 +177,19 @@
     convertArticleBody()
     convertFootnotes()
     copyArticleToClipboard()
+    hasConverted = true
   }
 
   function convertButtonClicked() {
     lockArticle()
     convertArticleBody()
     convertFootnotes()
+    alert("Article converted successfully.")
+    hasConverted = true
   }
 
   function resetButtonClicked() {
+    hasConverted = false
     let bodyTextbox = document.getElementById("bodytextbox")
     bodyTextbox.value = ""
     bodyTextbox.style.color = 'black'
